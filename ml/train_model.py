@@ -1,6 +1,8 @@
 import pandas as pd;
 import pickle
+import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
 from preprocessing.train_test_data import train_test_split_data
 
 x_train,x_test,y_train,y_test,encoders=train_test_split_data()
@@ -23,5 +25,6 @@ output_df=pd.DataFrame({
     "predicted_value":decoded_output,
     "confidence":confidences.round(2)
 })
+
 
 print(output_df)

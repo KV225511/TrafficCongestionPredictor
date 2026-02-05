@@ -1,5 +1,8 @@
+import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
 from preprocessing.train_test_data import train_test_split_data
+
 
 x_train,x_test,y_train,y_test,encoders=train_test_split_data()
 
@@ -32,3 +35,17 @@ accuracy_percentage = (correct_count / total_count) * 100
 
 print(f"Accuracy: {accuracy_percentage:.2f}%")
 print(f"Correct predictions: {correct_count} out of {total_count}")
+
+
+report = classification_report(y_test, y_predict, output_dict=True)
+
+classes = ['0', '1', '2', '3']
+f1_scores = [report[c]['f1-score'] for c in classes]
+
+plt.figure()
+plt.bar(classes, f1_scores)
+plt.xlabel("Traffic Density Class")
+plt.ylabel("F1-score")
+plt.title("Class-wise F1-score")
+plt.ylim(0, 1)
+plt.show()
