@@ -15,6 +15,9 @@ y_predict=rf_model.predict(x_test)
 y_predict_prob=rf_model.predict_proba(x_test)
 decoded_output=encoders["traffic_density_level"].inverse_transform(y_predict)
 
+with open("ml/model.pkl","wb") as f:
+    pickle.dump(rf_model,f)
+
 confidences=y_predict_prob.max(axis=1)*100
 output_df=pd.DataFrame({
     "predicted_value":decoded_output,
