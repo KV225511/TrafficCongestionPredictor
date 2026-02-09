@@ -1,4 +1,6 @@
 numpy
 pandas
-sklearn
+scikit-learn
 matplotlib
+django
+djangorestframework

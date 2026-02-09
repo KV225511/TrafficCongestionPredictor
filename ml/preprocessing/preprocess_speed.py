@@ -4,22 +4,18 @@ from sklearn.preprocessing import LabelEncoder
 
 
 def drop_data(df):
-    df.drop(columns=["Trip_ID","start_area","end_area"],inplace=True)
+    df.drop(columns=["Trip_ID"],inplace=True)
 
 
 def label_data(df,encoders):
-    columns=["time_of_day","day_of_week","weather_condition","road_type","distance_km"]
-    target_col="traffic_density_level"
+    columns=["start_area","end_area","time_of_day","day_of_week","weather_condition","road_type","traffic_density_level","distance_km"]
     for col in columns:
         le=LabelEncoder()
         df[col]=le.fit_transform(df[col])
         encoders[col]=le
         
-    target_le=LabelEncoder()
-    df[target_col]=target_le.fit_transform(df[target_col])
-    encoders[target_col]=target_le
-    x=df.drop(columns=["traffic_density_level"])
-    y=df["traffic_density_level"]
+    x=df.drop(columns=["average_speed_kmph"])
+    y=df["average_speed_kmph"]
     return x,y,encoders
     
 def preprocess_data(df):

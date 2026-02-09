@@ -8,7 +8,7 @@ from preprocessing.train_test_data import train_test_split_data
 x_train,x_test,y_train,y_test,encoders=train_test_split_data()
 
 rf_model = RandomForestClassifier(
-    n_estimators=150,
+    n_estimators=200,
     random_state=42
 )
 
