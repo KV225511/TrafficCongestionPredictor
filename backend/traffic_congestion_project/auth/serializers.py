@@ -9,6 +9,6 @@ class UserSerializer(serializers.ModelSerializer):
         
         
     def validate(self,data):
-        if not re.match(r'[^a-zA-Z0-9]+',data['username']):
-            raise serializers.ValidationError('Please Enter a Username without special symbols')
+        if not data['username'].isalnum():
+            raise serializers.ValidationError('Please enter a username without special symbols')
         return data

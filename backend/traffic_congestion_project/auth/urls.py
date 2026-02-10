@@ -1,8 +1,7 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from .views import Signup
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/weather/", include("weather.urls")),
+    path("signup/", Signup.as_view(), name="signup"),
 ]
 
