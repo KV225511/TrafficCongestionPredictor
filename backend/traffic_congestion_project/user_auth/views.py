@@ -5,6 +5,7 @@ from .serializers import UserSerializer
 from django.contrib.auth.hashers import make_password 
 from  rest_framework.authtoken.models import Token
 from .models import User
+from datetime import datetime
 # Create your views here.
 
 class Signup(APIView):

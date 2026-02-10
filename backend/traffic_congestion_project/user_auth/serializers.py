@@ -9,6 +9,6 @@ class UserSerializer(serializers.ModelSerializer):
         
         
     def validate(self,data):
-        if not data['username'].isalnum():
+        if  not (data['username'].isalnum() or data['username'].isNull()) :
             raise serializers.ValidationError('Please enter a username without special symbols')
         return data
