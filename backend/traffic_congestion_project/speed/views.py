@@ -21,6 +21,7 @@ class AverageSpeedBetweenLocations(APIView):
 
 		start = serializer.validated_data["start"]
 		end = serializer.validated_data["end"]
+		depart_at = serializer.validated_data.get("departAt")
 
 		start_lat, start_lon = get_lat_lon(start)
 		end_lat, end_lon = get_lat_lon(end)
@@ -35,6 +36,10 @@ class AverageSpeedBetweenLocations(APIView):
 		coords = f"{start_lat},{start_lon}:{end_lat},{end_lon}"
 		url = f"https://api.tomtom.com/routing/1/calculateRoute/{coords}/json"
 		params = {"traffic": "true", "key": api_key}
+		
+		# Add departAt parameter if provided
+		if depart_at:
+			params["departAt"] = depart_at.isoformat()
 
 		try:
 			resp = requests.get(url, params=params, timeout=10)
@@ -67,5 +72,9 @@ class AverageSpeedBetweenLocations(APIView):
 			"avg_speed_kmph": round(avg_speed_kmph, 2) if avg_speed_kmph is not None else None,
 			"tomtom_raw": data.get("routes", [{}])[0].get("summary", {}),
 		}
+		
+		# Include departAt in response if provided
+		if depart_at:
+			result["departAt"] = depart_at.isoformat()
 
 		return Response(result, status=status.HTTP_200_OK)
