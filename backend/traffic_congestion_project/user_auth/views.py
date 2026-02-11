@@ -8,6 +8,7 @@ from .models import User
 from datetime import datetime
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 
 # Create your views here.
 
@@ -22,7 +23,7 @@ class Signup(APIView):
         return Response({
             'token':token.key,
             'user':UserSerializer(user).data
-        })
+        },status=status.HTTP_200_OK)
         
     
 class Login(APIView):
@@ -36,13 +37,13 @@ class Login(APIView):
             return Response({'error':"Invalid credentials" },status=401)
         
         token,_=Token.objects.get_or_create(user=user)
-        return Response({"token":token.key,"user":UserSerializer(user).data})
+        return Response({"token":token.key,"user":UserSerializer(user).data},status=status.HTTP_200_OK)
     
 class Logout(APIView):
     permission_classes=[IsAuthenticated]
     def post(self,request,*args,**kwargs):
         request.auth.delete()
-        return Response({"message":"Logged out successfully!"})
+        return Response({"message":"Logged out successfully!"},status=status.HTTP_200_OK)
         
         
     
@@ -52,4 +53,4 @@ class Delete_Account(APIView):
         user=request.user
         request.auth.delete()
         user.delete()
-        return Response({'message':"User successfully deleted"})
+        return Response({'message':"User successfully deleted"},status=status.HTTP_200_OK)
