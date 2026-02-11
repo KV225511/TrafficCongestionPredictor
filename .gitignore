@@ -48,3 +48,4 @@ ML/model/
 ml/speed_model.pkl
 ml/encoders_speed.pkl
 ml/speed_model_scaler.pkl
+C:\Users\kriss\github\TrafficCongestionPredictor\ml\data\delhi_traffic_features.csv
