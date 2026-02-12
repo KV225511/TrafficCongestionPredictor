@@ -1,27 +1,150 @@
 from django.shortcuts import render
-from rest_framework import APIView
-from weather.services import WeatherBetweenLocations
-from speed.sevices import AverageSpeedBetweenLocations
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serilaizers import PredictSerializer
-import pandas as pd
+from weather.utils.resolve import get_resolved_weather
+from speed.sevices import get_average_speed_between_locations
 import pickle
-from ml.model import model as ml_model
+import numpy as np
+import os
+from django.conf import settings
+from datetime import datetime
+from speed.utils.resolve import map_road_type
 
 class Predict(APIView):
-    def post(self,request,*args,**kwargs):
-        data=request.data.copy()
-        serializer=PredictSerializer(data=data)
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        serializer = PredictSerializer(data=data)
+        
         if not serializer.is_valid():
-            return Response({'error':'Invalid Input fields'},status=status.HTTP_400_BAD_REQUEST)
-        weather_input=WeatherBetweenLocations.get_weather(serializer.validated_data)
-        speed_input=AverageSpeedBetweenLocations.get_speed(serializer.validated_data)
-        with open("ml/","rb") as f:
-            ml_model=pickle.load(f)
-        ml_model.predict()
+            return Response(
+                {'error': 'Invalid Input fields', 'details': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
+        start = serializer.validated_data.get('start')
+        end = serializer.validated_data.get('end')
+        depart_at = serializer.validated_data.get('depart_at')
         
+        try:
+            # Navigate from backend/traffic_congestion_project to root/ml
+            project_root = os.path.dirname(os.path.dirname(settings.BASE_DIR))
+            model_path = os.path.join(project_root, 'ml', 'model.pkl')
+            encoders_path = os.path.join(project_root, 'ml', 'encoders.pkl')
+            
+            with open(model_path, "rb") as f:
+                model = pickle.load(f)
+            with open(encoders_path, "rb") as f:
+                encoders = pickle.load(f)
+        except Exception as e:
+            return Response(
+                {'error': f'Model loading failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
+        # Get real predictions with actual data
+        prediction_response = self._get_real_prediction(
+            model, encoders, start, end, depart_at
+        )
         
+        return Response(prediction_response, status=status.HTTP_200_OK)
+    
+    def _get_real_prediction(self, model, encoders, start, end, depart_at):
+        try:
+            # Get average speed and distance for the route
+            speed_result = get_average_speed_between_locations(start, end, depart_at=depart_at)
+            if speed_result is None:
+                return {'error': 'Could not fetch speed data'}
+            avg_speed, distance_km_actual, functional_road_class = speed_result
+            
+            # Get weather type for the route
+            weather_type = get_resolved_weather(start, end, depart_at=depart_at)
+            if weather_type is None:
+                return {'error': 'Could not fetch weather data'}
+            
+            # Prepare input data
+            input_data = self._prepare_input_data(start, end, depart_at, avg_speed,weather_type, encoders,distance_km_actual,functional_road_class)
+
+            if input_data is None:
+                return {'error': 'Could not prepare input data', 'details': 'Check that all categorical values match training data'}
+            
+            # Make prediction
+            prediction = model.predict([input_data])[0]
+            prediction_prob = model.predict_proba([input_data])[0]
+            confidence = prediction_prob.max() * 100
+            
+            # Decode prediction
+            decoded_prediction = encoders['traffic_density_level'].inverse_transform([prediction])[0]
+            
+            return {
+                'predicted_traffic_level': decoded_prediction,
+                'confidence': round(float(confidence), 2),
+                'input_data': {
+                    'start': start,
+                    'end': end,
+                    'depart_at': str(depart_at) if depart_at else 'current',
+                    'avg_speed': avg_speed,
+                    'weather_type': weather_type,
+                    'distance_km': distance_km_actual,
+                    'road_type': map_road_type(functional_road_class)
+                }
+            }
+        except Exception as e:
+            return {'error': f'Prediction failed: {str(e)}'}
+    
+    def _prepare_input_data(self, start, end, depart_at, avg_speed, weather_type, encoders, distance_km_actual,functional_road_class):
+        try:
+            
+            # Extract time features
+            if depart_at:
+                hour = depart_at.hour
+                day_num = depart_at.weekday()
+            else:
+                now = datetime.now()
+                hour = now.hour
+                day_num = now.weekday()
+            
+            # Convert hour to time_of_day category
+            if 6 <= hour < 10:
+                time_of_day = "Morning Peak"
+            elif 10 <= hour < 17:
+                time_of_day = "Afternoon"
+            elif 17 <= hour < 20:
+                time_of_day = "Evening Peak"
+            else:
+                time_of_day = "Night"
+            
+            # Convert day_num to day_of_week category
+            day_of_week = "Weekend" if day_num >= 5 else "Weekday"
+            
+            # Normalize weather_type to match training data format
+            weather_mapping = {
+                "clear": "Clear",
+                "fog": "Fog",
+                "rain": "Rain",
+                "heatwave": "Heatwave"
+            }
+            weather_condition = weather_mapping.get(weather_type, "Clear")
+            
+            road_type = map_road_type(functional_road_class)
+
+            # Encode categorical features
+            time_of_day_encoded = encoders['time_of_day'].transform([time_of_day])[0]
+            day_of_week_encoded = encoders['day_of_week'].transform([day_of_week])[0]
+            weather_encoded = encoders['weather_condition'].transform([weather_condition])[0]
+            road_type_encoded = encoders['road_type'].transform([road_type])[0]
+            distance_encoded = distance_km_actual  # Use actual distance as is
+
+            return [
+                time_of_day_encoded,
+                day_of_week_encoded,
+                weather_encoded,
+                road_type_encoded,
+                distance_encoded,
+                avg_speed
+            ]
+
+        except Exception as e:
+            return {'error': f'Error preparing input data: {str(e)}'}
         

@@ -8,7 +8,7 @@ def drop_data(df):
 
 
 def label_data(df,encoders):
-    columns=["time_of_day","day_of_week","weather_condition","road_type","distance_km"]
+    columns=["time_of_day","day_of_week","weather_condition","road_type"]
     target_col="traffic_density_level"
     for col in columns:
         le=LabelEncoder()

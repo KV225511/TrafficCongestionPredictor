@@ -1,50 +1,33 @@
-from rest_framework.views import APIView
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework import status
-
-from .serializers import WeatherRequestSerializer
 from .utils.geocode import get_lat_lon
 from .utils.weather import get_weather
 
 
-class WeatherBetweenLocations(APIView):
-    @staticmethod
-    def get_weather(self, request: Request):
-        serializer = WeatherRequestSerializer(data=request.query_params)
+def get_weather_between_locations(start, end, depart_at=None):
+    start_lat, start_lon = get_lat_lon(start)
+    end_lat, end_lon = get_lat_lon(end)
 
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    if start_lat is None or end_lat is None:
+        return None
 
-        start = serializer.validated_data["start"]
-        end = serializer.validated_data["end"]
+    try:
+        start_weather = get_weather(start_lat, start_lon, depart_at=depart_at)
+        end_weather = get_weather(end_lat, end_lon, depart_at=depart_at)
+    except Exception:
+        return None
 
-        start_lat, start_lon = get_lat_lon(start)
-        end_lat, end_lon = get_lat_lon(end)
+    if not start_weather or not end_weather:
+        return None
 
-        if start_lat is None or end_lat is None:
-            return Response(
-                {"error": "Invalid location provided"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return Response(
-            {
-                "start": {
-                    "name": start,
-                    "lat": start_lat,
-                    "lon": start_lon,
-                    "weather": get_weather(start_lat, start_lon),
-                },
-                "end": {
-                    "name": end,
-                    "lat": end_lat,
-                    "lon": end_lon,
-                    "weather": get_weather(end_lat, end_lon),
-                }
+    try:
+        return {
+            "start": {
+                "weather_code": start_weather.get("weathercode"),
+                "temperature": start_weather.get("temperature")
             },
-            status=status.HTTP_200_OK
-        )
+            "end": {
+                "weather_code": end_weather.get("weathercode"),
+                "temperature": end_weather.get("temperature")
+            }
+        }
+    except (KeyError, TypeError):
+        return None
