@@ -25,8 +25,8 @@ def resolve_weather_type(start_data, end_data):
     return "clear"
 
 
-def get_resolved_weather(start, end, depart_at=None):
-    weather_data = get_weather_between_locations(start, end, depart_at=depart_at)
+async def get_resolved_weather(start, end, depart_at=None):
+    weather_data =await get_weather_between_locations(start, end, depart_at=depart_at)
     
     if not weather_data:
         return None

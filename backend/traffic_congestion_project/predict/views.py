@@ -11,17 +11,27 @@ import os
 from django.conf import settings
 from datetime import datetime
 from speed.utils.resolve import map_road_type
+import asyncio
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
+
+
+MODEL=None
+ENCODERS=None
 class Predict(APIView):
+    authentication_classes = [TokenAuthentication] 
+    permission_classes=[IsAuthenticated]
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
         serializer = PredictSerializer(data=data)
         
         if not serializer.is_valid():
             return Response(
-                {'error': 'Invalid Input fields', 'details': serializer.errors},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        {'error': 'Invalid Input fields', 'details': serializer.errors},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
         
         start = serializer.validated_data.get('start')
         end = serializer.validated_data.get('end')
@@ -32,11 +42,8 @@ class Predict(APIView):
             project_root = os.path.dirname(os.path.dirname(settings.BASE_DIR))
             model_path = os.path.join(project_root, 'ml', 'model.pkl')
             encoders_path = os.path.join(project_root, 'ml', 'encoders.pkl')
-            
-            with open(model_path, "rb") as f:
-                model = pickle.load(f)
-            with open(encoders_path, "rb") as f:
-                encoders = pickle.load(f)
+            model, encoders = load_model_and_encoders(model_path,encoders_path)
+
         except Exception as e:
             return Response(
                 {'error': f'Model loading failed: {str(e)}'},
@@ -44,22 +51,24 @@ class Predict(APIView):
             )
         
         # Get real predictions with actual data
-        prediction_response = self._get_real_prediction(
+        prediction_response = asyncio.run(self._get_real_prediction(
             model, encoders, start, end, depart_at
-        )
+        ))
         
         return Response(prediction_response, status=status.HTTP_200_OK)
     
-    def _get_real_prediction(self, model, encoders, start, end, depart_at):
+    async def _get_real_prediction(self, model, encoders, start, end, depart_at):
         try:
             # Get average speed and distance for the route
-            speed_result = get_average_speed_between_locations(start, end, depart_at=depart_at)
+            speed_task = get_average_speed_between_locations(start, end, depart_at=depart_at)
+            weather_task = get_resolved_weather(start, end, depart_at=depart_at)
+            speed_result,weather_type=await asyncio.gather(speed_task,weather_task)
             if speed_result is None:
                 return {'error': 'Could not fetch speed data'}
+
             avg_speed, distance_km_actual, functional_road_class = speed_result
             
             # Get weather type for the route
-            weather_type = get_resolved_weather(start, end, depart_at=depart_at)
             if weather_type is None:
                 return {'error': 'Could not fetch weather data'}
             
@@ -92,6 +101,7 @@ class Predict(APIView):
             }
         except Exception as e:
             return {'error': f'Prediction failed: {str(e)}'}
+
     
     def _prepare_input_data(self, start, end, depart_at, avg_speed, weather_type, encoders, distance_km_actual,functional_road_class):
         try:
@@ -146,5 +156,17 @@ class Predict(APIView):
             ]
 
         except Exception as e:
-            return {'error': f'Error preparing input data: {str(e)}'}
+            return None
         
+        
+def load_model_and_encoders(model_path, encoders_path):
+    global MODEL, ENCODERS
+
+    if MODEL is None or ENCODERS is None:
+        with open(model_path, "rb") as f:
+            MODEL = pickle.load(f)
+        with open(encoders_path, "rb") as f:
+            ENCODERS = pickle.load(f)
+
+    return MODEL, ENCODERS
+

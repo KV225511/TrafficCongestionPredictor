@@ -1,10 +1,11 @@
 import os
 import requests
+import httpx
 from django.conf import settings
 from weather.utils.geocode import get_lat_lon
 
 
-def get_average_speed_between_locations(start, end, depart_at=None):
+async def get_average_speed_between_locations(start, end, depart_at=None):
     start_lat, start_lon = get_lat_lon(start)
     end_lat, end_lon = get_lat_lon(end)
 
@@ -28,10 +29,11 @@ def get_average_speed_between_locations(start, end, depart_at=None):
         params["departAt"] = depart_at.isoformat()
 
     try:
-        resp = requests.get(url, params=params, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-    except requests.RequestException:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+    except httpx.HTTPError:
         return None
 
     try:

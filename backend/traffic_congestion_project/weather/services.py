@@ -1,17 +1,21 @@
 from .utils.geocode import get_lat_lon
 from .utils.weather import get_weather
+import asyncio
 
 
-def get_weather_between_locations(start, end, depart_at=None):
-    start_lat, start_lon = get_lat_lon(start)
-    end_lat, end_lon = get_lat_lon(end)
+async def get_weather_between_locations(start, end, depart_at=None):
+    try:
+        (start_lat, start_lon),(end_lat, end_lon) =await asyncio.gather(asyncio.to_thread(get_lat_lon,start),
+        asyncio.to_thread(get_lat_lon,end))
 
-    if start_lat is None or end_lat is None:
+    except Exception:
         return None
 
+    if None in (start_lat,start_lon,end_lat,end_lon):
+        return None
     try:
-        start_weather = get_weather(start_lat, start_lon, depart_at=depart_at)
-        end_weather = get_weather(end_lat, end_lon, depart_at=depart_at)
+        start_weather,end_weather = await asyncio.gather(asyncio.to_thread(get_weather,start_lat, start_lon, depart_at=depart_at),
+         asyncio.to_thread(get_weather,end_lat, end_lon, depart_at=depart_at))
     except Exception:
         return None
 
