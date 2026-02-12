@@ -14,6 +14,8 @@ from speed.utils.resolve import map_road_type
 import asyncio
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from user_auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 
 
@@ -51,13 +53,13 @@ class Predict(APIView):
             )
         
         # Get real predictions with actual data
-        prediction_response = asyncio.run(self._get_real_prediction(
+        prediction_response = asyncio.run(self._get_real_prediction(request,
             model, encoders, start, end, depart_at
         ))
         
         return Response(prediction_response, status=status.HTTP_200_OK)
     
-    async def _get_real_prediction(self, model, encoders, start, end, depart_at):
+    async def _get_real_prediction(self, request, model, encoders, start, end, depart_at):
         try:
             # Get average speed and distance for the route
             speed_task = get_average_speed_between_locations(start, end, depart_at=depart_at)
@@ -85,7 +87,7 @@ class Predict(APIView):
             
             # Decode prediction
             decoded_prediction = encoders['traffic_density_level'].inverse_transform([prediction])[0]
-            
+            await asyncio.to_thread(update_history, request, decoded_prediction)
             return {
                 'predicted_traffic_level': decoded_prediction,
                 'confidence': round(float(confidence), 2),
@@ -170,3 +172,17 @@ def load_model_and_encoders(model_path, encoders_path):
 
     return MODEL, ENCODERS
 
+
+def update_history(request,prediction):
+    username=request.user.username
+    try:
+        user_object=User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        return {"error":"User not found"}
+         
+    total_length= len(user_object.history)
+    if total_length==5:
+        user_object.history.pop(0)
+    user_object.history.append(prediction)
+    user_object.save()
+     
