@@ -16,11 +16,29 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from user_auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-
+from datetime import datetime
 
 
 MODEL=None
 ENCODERS=None
+
+
+def load_model_and_encoders(model_path, encoders_path):
+    global MODEL, ENCODERS
+
+    if MODEL is None or ENCODERS is None:
+        with open(model_path, "rb") as f:
+            MODEL = pickle.load(f)
+        with open(encoders_path, "rb") as f:
+            ENCODERS = pickle.load(f)
+
+    return MODEL, ENCODERS
+
+project_root = os.path.dirname(os.path.dirname(settings.BASE_DIR))
+model_path = os.path.join(project_root, 'ml', 'model.pkl')
+encoders_path = os.path.join(project_root, 'ml', 'encoders.pkl')
+load_model_and_encoders(model_path,encoders_path)
+
 class Predict(APIView):
     authentication_classes = [TokenAuthentication] 
     permission_classes=[IsAuthenticated]
@@ -41,10 +59,8 @@ class Predict(APIView):
         
         try:
             # Navigate from backend/traffic_congestion_project to root/ml
-            project_root = os.path.dirname(os.path.dirname(settings.BASE_DIR))
-            model_path = os.path.join(project_root, 'ml', 'model.pkl')
-            encoders_path = os.path.join(project_root, 'ml', 'encoders.pkl')
-            model, encoders = load_model_and_encoders(model_path,encoders_path)
+            
+            model, encoders = MODEL,ENCODERS
 
         except Exception as e:
             return Response(
@@ -62,7 +78,7 @@ class Predict(APIView):
     async def _get_real_prediction(self, request, model, encoders, start, end, depart_at):
         try:
             # Get average speed and distance for the route
-            speed_task = get_average_speed_between_locations(start, end, depart_at=depart_at)
+            speed_task =get_average_speed_between_locations(start, end, depart_at=depart_at)
             weather_task = get_resolved_weather(start, end, depart_at=depart_at)
             speed_result,weather_type=await asyncio.gather(speed_task,weather_task)
             if speed_result is None:
@@ -161,16 +177,7 @@ class Predict(APIView):
             return None
         
         
-def load_model_and_encoders(model_path, encoders_path):
-    global MODEL, ENCODERS
 
-    if MODEL is None or ENCODERS is None:
-        with open(model_path, "rb") as f:
-            MODEL = pickle.load(f)
-        with open(encoders_path, "rb") as f:
-            ENCODERS = pickle.load(f)
-
-    return MODEL, ENCODERS
 
 
 def update_history(request,prediction):
