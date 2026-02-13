@@ -1,7 +1,6 @@
 import os
 import requests
 import httpx
-from django.conf import settings
 from weather.utils.geocode import get_lat_lon
 
 
@@ -12,7 +11,7 @@ async def get_average_speed_between_locations(start, end, depart_at=None):
     if start_lat is None or start_lon is None or end_lat is None or end_lon is None:
         return None
 
-    api_key = os.getenv("TOMTOM_API_KEY") or getattr(settings, "TOMTOM_API_KEY", None)
+    api_key = os.getenv("TOMTOM_API_KEY")
     if not api_key:
         return None
 

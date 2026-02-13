@@ -1,6 +1,5 @@
 import os
 import requests
-from django.conf import settings
 
 
 def get_lat_lon(place: str):
@@ -8,7 +7,7 @@ def get_lat_lon(place: str):
         return None, None
 
     place_clean = place.strip()
-    api_key = os.getenv("TOMTOM_API_KEY") or getattr(settings, "TOMTOM_API_KEY", None)
+    api_key = os.getenv("TOMTOM_API_KEY")
 
     if not api_key:
         return None, None

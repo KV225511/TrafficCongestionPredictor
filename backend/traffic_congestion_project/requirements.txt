@@ -1,0 +1,7 @@
+Django>=5.2.11
+djangorestframework
+python-dotenv
+requests
+httpx
+numpy
+scikit-learn
