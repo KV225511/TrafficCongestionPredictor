@@ -5,3 +5,6 @@ scikit-learn
 matplotlib
 django
 djangorestframework
+python-dotenv
+httpx
+asyncio
