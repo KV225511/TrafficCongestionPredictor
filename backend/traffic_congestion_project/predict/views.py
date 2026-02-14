@@ -94,6 +94,12 @@ class Predict(APIView):
                 return {'error': 'Could not prepare input data', 'details': 'Check that all categorical values match training data'}
             
             # Make prediction
+            prediction = model.predict([input_data])
+            prediction_prob = model.predict_proba([input_data])
+            confidence = prediction_prob.max() * 100
+
+            print(prediction)
+            print(prediction_prob)
             prediction = model.predict([input_data])[0]
             prediction_prob = model.predict_proba([input_data])[0]
             confidence = prediction_prob.max() * 100
@@ -177,19 +183,25 @@ class Predict(APIView):
 
 
 
-def update_history(request,prediction):
-    username=request.user.username
-    start=request.data["start"]
-    end=request.data["end"]
+def update_history(request, prediction):
+    username = request.user.username
+    start = request.data.get("start")
+    end = request.data.get("end")
+
     try:
-        user_object=User.objects.get(username=username)
-    except ObjectDoesNotExist:
-        return {"error":"User not found"}
-         
-    total_length= len(user_object.history)
-    if total_length==5:
-        first_item=list(user_object.history.keys())[0]
-        user_object.history.pop(first_item)
-    user_object.history[prediction]=[start,end]
-    user_object.save()
+        user_object = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return {"error": "User not found"}
+
+    history = user_object.history or {}
+
+    if len(history) >= 5:
+        first_key = list(history.keys())[0]
+        history.pop(first_key)
+
+    history[str(prediction)] = [start, end]
+
+    user_object.history = history
+    user_object.save(update_fields=["history"])
+
      

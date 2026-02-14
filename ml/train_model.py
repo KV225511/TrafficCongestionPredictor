@@ -27,4 +27,4 @@ output_df=pd.DataFrame({
 })
 
 
-print(output_df)
+print(y_predict_prob)

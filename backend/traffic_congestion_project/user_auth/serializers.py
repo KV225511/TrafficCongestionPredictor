@@ -8,7 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields='__all__'
         
         
-    def validate(self,data):
-        if  not (data['username'].isalnum() or data['username'].isNull()) :
-            raise serializers.ValidationError('Please enter a username without special symbols')
+    def validate(self, data):
+        username = data.get("username") or ""
+        if not username or not str(username).isalnum():
+            raise serializers.ValidationError("Please enter a username without special symbols")
         return data
