@@ -9,6 +9,7 @@ from rest_framework.response import Response
 class Get_History(APIView):
     authentication_classes=[TokenAuthentication]
     permission_classes=[IsAuthenticated]
-    def get(self,request,*args,**kwargs):
-        history=request.user.history
-        return Response(history,status=status.HTTP_200_OK)
+    def get(self, request, *args, **kwargs):
+        raw = request.user.history
+        history = raw if isinstance(raw, list) else []
+        return Response(history, status=status.HTTP_200_OK)

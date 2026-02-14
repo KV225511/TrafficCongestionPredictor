@@ -17,7 +17,7 @@ const registerSchema = z
   .object({
     username: z.string().min(1, "Required").regex(/^[a-zA-Z0-9]+$/, "Alphanumeric only"),
     email: z.string().email("Valid email required"),
-    password: z.string().min(6, "Minimum 6 characters"),
+    password: z.string().min(8, "Minimum 8 characters"),
     confirmPassword: z.string().min(1, "Confirm your password"),
     terms: z.boolean().refine((v) => v, "You must accept the terms"),
   })
@@ -99,7 +99,7 @@ const RegisterPage = () => {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input type={showPassword ? "text" : "password"} placeholder="Min 6 characters" {...field} />
+                      <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" {...field} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label="Toggle password">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

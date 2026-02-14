@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -95,22 +94,25 @@ class Predict(APIView):
             
             # Make prediction
             prediction = model.predict([input_data])
-            prediction_prob = model.predict_proba([input_data])
-            confidence = prediction_prob.max() * 100
-
-            print(prediction)
-            print(prediction_prob)
-            prediction = model.predict([input_data])[0]
             prediction_prob = model.predict_proba([input_data])[0]
-            confidence = prediction_prob.max() * 100
+            confidence = [round(float(i*100),2) for i in prediction_prob]
+            print(prediction_prob)
+            
+            prediction = model.predict([input_data])[0]
+            prediction_prob_max = model.predict_proba([input_data])[0]
+            confidence_max = prediction_prob_max.max() * 100
             
             # Decode prediction
             decoded_prediction = encoders['traffic_density_level'].inverse_transform([prediction])[0]
             await asyncio.to_thread(update_history, request, decoded_prediction)
             return {
                 'predicted_traffic_level': decoded_prediction,
-                'confidence': round(float(confidence), 2),
+                'confidence': round(float(confidence_max), 2),
                 'input_data': {
+                    'High':confidence[0],
+                    'Low':confidence[1],
+                    'Medium':confidence[2],
+                    'Very High':confidence[3],
                     'start': start,
                     'end': end,
                     'depart_at': str(depart_at) if depart_at else 'current',
@@ -193,15 +195,14 @@ def update_history(request, prediction):
     except User.DoesNotExist:
         return {"error": "User not found"}
 
-    history = user_object.history or {}
+    history = user_object.history if isinstance(user_object.history, list) else []
 
     if len(history) >= 5:
-        first_key = list(history.keys())[0]
-        history.pop(first_key)
+        history.pop(0)
+        
 
-    history[str(prediction)] = [start, end]
-
+    history.append({prediction:[start,end]})
     user_object.history = history
-    user_object.save(update_fields=["history"])
+    user_object.save()
 
      

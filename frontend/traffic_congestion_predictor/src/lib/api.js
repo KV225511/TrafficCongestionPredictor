@@ -90,6 +90,13 @@ class ApiClient {
       requiresAuth: true,
     });
   }
+
+  async deleteAccount() {
+    return this.request("/user_auth/delete_account/", {
+      method: "DELETE",
+      requiresAuth: true,
+    });
+  }
 }
 
 export const api = new ApiClient();

@@ -8,3 +8,4 @@ djangorestframework
 python-dotenv
 httpx
 asyncio
+django-cors-headers

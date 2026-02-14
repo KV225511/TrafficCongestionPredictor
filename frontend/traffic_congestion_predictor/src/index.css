@@ -103,7 +103,12 @@
     @apply border-border;
   }
 
+  html,
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen;
+  }
+
+  #root {
+    min-height: 100%;
   }
 }
