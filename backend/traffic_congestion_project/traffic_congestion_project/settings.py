@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "weather",
     "speed",
     "user_auth",
+    "history"
 ]
 
 MIDDLEWARE = [

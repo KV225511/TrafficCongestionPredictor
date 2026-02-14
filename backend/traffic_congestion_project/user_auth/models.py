@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     
-    history = models.JSONField(default=list)
+    history = models.JSONField(default=dict)
     last_login_time = models.DateTimeField(default=datetime.now)
     def __str__(self):
         return self.username

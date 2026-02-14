@@ -58,10 +58,7 @@ class Predict(APIView):
         depart_at = serializer.validated_data.get('depart_at')
         
         try:
-            # Navigate from backend/traffic_congestion_project to root/ml
-            
             model, encoders = MODEL,ENCODERS
-
         except Exception as e:
             return Response(
                 {'error': f'Model loading failed: {str(e)}'},
@@ -182,6 +179,8 @@ class Predict(APIView):
 
 def update_history(request,prediction):
     username=request.user.username
+    start=request.data["start"]
+    end=request.data["end"]
     try:
         user_object=User.objects.get(username=username)
     except ObjectDoesNotExist:
@@ -189,7 +188,8 @@ def update_history(request,prediction):
          
     total_length= len(user_object.history)
     if total_length==5:
-        user_object.history.pop(0)
-    user_object.history.append(prediction)
+        first_item=list(user_object.history.keys())[0]
+        user_object.history.pop(first_item)
+    user_object.history[prediction]=[start,end]
     user_object.save()
      
