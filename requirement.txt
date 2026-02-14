@@ -9,3 +9,4 @@ python-dotenv
 httpx
 asyncio
 django-cors-headers
+psycopg2
