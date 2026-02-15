@@ -31,8 +31,8 @@ def load_model_and_encoders(model_path, encoders_path):
 
     return MODEL, ENCODERS
 
-model_path = os.path.join(settings.BASE_DIR.parent, "ml", "model.pkl")
-encoders_path = os.path.join(settings.BASE_DIR.parent, "ml", "encoders.pkl")
+model_path = os.path.join(settings.BASE_DIR, "ml", "model.pkl")
+encoders_path = os.path.join(settings.BASE_DIR, "ml", "encoders.pkl")
 load_model_and_encoders(model_path,encoders_path)
 
 class Predict(APIView):
