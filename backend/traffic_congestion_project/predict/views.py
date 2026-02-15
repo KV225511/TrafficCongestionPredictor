@@ -5,7 +5,6 @@ from .serilaizers import PredictSerializer
 from weather.utils.resolve import get_resolved_weather
 from speed.sevices import get_average_speed_between_locations
 import pickle
-import numpy as np
 import os
 from django.conf import settings
 from datetime import datetime
@@ -14,7 +13,6 @@ import asyncio
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from user_auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 
 
@@ -33,9 +31,8 @@ def load_model_and_encoders(model_path, encoders_path):
 
     return MODEL, ENCODERS
 
-project_root = os.path.dirname(os.path.dirname(settings.BASE_DIR))
-model_path = os.path.join(project_root, 'ml', 'model.pkl')
-encoders_path = os.path.join(project_root, 'ml', 'encoders.pkl')
+model_path = os.path.join(settings.BASE_DIR.parent, "ml", "model.pkl")
+encoders_path = os.path.join(settings.BASE_DIR.parent, "ml", "encoders.pkl")
 load_model_and_encoders(model_path,encoders_path)
 
 class Predict(APIView):
