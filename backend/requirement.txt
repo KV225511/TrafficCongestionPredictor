@@ -1,0 +1,14 @@
+numpy
+pandas
+requests
+scikit-learn
+matplotlib
+django
+djangorestframework
+python-dotenv
+httpx
+asyncio
+django-cors-headers
+psycopg2
+dj-database-url
+psycopg2-binary
