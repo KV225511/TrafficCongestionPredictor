@@ -51,6 +51,13 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ThemeToggle from "@/components/ThemeToggle";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const predictionSchema = z.object({
   start: z.string().min(1, "Start location is required"),
@@ -64,6 +71,37 @@ const trafficColors = {
   Medium: "bg-traffic-medium text-traffic-medium-foreground",
   High: "bg-traffic-high text-traffic-high-foreground",
 };
+
+const DELHI_LOCATIONS = [
+  { value: "AIIMS, New Delhi, Delhi, India", label: "AIIMS" },
+  { value: "Chandni Chowk, Delhi, India", label: "Chandni Chowk" },
+  { value: "Civil Lines, Delhi, India", label: "Civil Lines" },
+  { value: "Connaught Place, New Delhi, Delhi, India", label: "Connaught Place" },
+  { value: "Dwarka, New Delhi, Delhi, India", label: "Dwarka" },
+  { value: "Greater Kailash, New Delhi, Delhi, India", label: "Greater Kailash" },
+  { value: "Hauz Khas, New Delhi, Delhi, India", label: "Hauz Khas" },
+  {
+    value: "Indira Gandhi International Airport, New Delhi, Delhi, India",
+    label: "IGI Airport",
+  },
+  { value: "Janakpuri, New Delhi, Delhi, India", label: "Janakpuri" },
+  { value: "Kalkaji, New Delhi, Delhi, India", label: "Kalkaji" },
+  { value: "Karol Bagh, New Delhi, Delhi, India", label: "Karol Bagh" },
+  { value: "Lajpat Nagar, New Delhi, Delhi, India", label: "Lajpat Nagar" },
+  { value: "Mayur Vihar, Delhi, India", label: "Mayur Vihar" },
+  { value: "Model Town, Delhi, India", label: "Model Town" },
+  { value: "Nehru Place, New Delhi, Delhi, India", label: "Nehru Place" },
+  { value: "Noida Sector 18, Noida, Uttar Pradesh, India", label: "Noida Sector 18" },
+  { value: "Okhla, New Delhi, Delhi, India", label: "Okhla" },
+  { value: "Pitampura, Delhi, India", label: "Pitampura" },
+  { value: "Preet Vihar, Delhi, India", label: "Preet Vihar" },
+  { value: "Punjabi Bagh, New Delhi, Delhi, India", label: "Punjabi Bagh" },
+  { value: "Rajouri Garden, New Delhi, Delhi, India", label: "Rajouri Garden" },
+  { value: "Rohini, Delhi, India", label: "Rohini" },
+  { value: "Saket, New Delhi, Delhi, India", label: "Saket" },
+  { value: "Shahdara, Delhi, India", label: "Shahdara" },
+  { value: "Vasant Kunj, New Delhi, Delhi, India", label: "Vasant Kunj" },
+];
 
 const MainPage = () => {
   const { user, logout } = useAuth();
@@ -218,30 +256,60 @@ const MainPage = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                  <FormField control={form.control} name="start" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Location</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input className="pl-9" placeholder="e.g. rameshwar building uttam nagar" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="end" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Location</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Navigation className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input className="pl-9" placeholder="e.g. shanti nursing home uttam nagar" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <FormField
+                    control={form.control}
+                    name="start"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Location</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger className="pl-9">
+                                <SelectValue placeholder="Select a start location" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {DELHI_LOCATIONS.map((loc) => (
+                                  <SelectItem key={loc.value} value={loc.value}>
+                                    {loc.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Location</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Navigation className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger className="pl-9">
+                                <SelectValue placeholder="Select an end location" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {DELHI_LOCATIONS.map((loc) => (
+                                  <SelectItem key={loc.value} value={loc.value}>
+                                    {loc.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FormField control={form.control} name="date" render={({ field }) => (
