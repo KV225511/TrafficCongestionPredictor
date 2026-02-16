@@ -125,9 +125,6 @@ const DELHI_LOCATIONS =[
   { value: "Nehru Place, New Delhi, Delhi, India", label: "Nehru Place" },
   { value: "Nehru Place Metro Station, New Delhi 110019, India", label: "Nehru Place - Metro Station" },
 
-  { value: "Noida Sector 18, Noida, Uttar Pradesh, India", label: "Noida Sector 18" },
-  { value: "DLF Mall of India, Sector 18, Noida 201301, India", label: "Noida Sector 18 - DLF Mall" },
-
   { value: "Okhla, New Delhi, Delhi, India", label: "Okhla" },
   { value: "Okhla Industrial Area Phase I, New Delhi 110020, India", label: "Okhla - Industrial Area" },
 
