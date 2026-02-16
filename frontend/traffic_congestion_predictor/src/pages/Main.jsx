@@ -72,36 +72,90 @@ const trafficColors = {
   High: "bg-traffic-high text-traffic-high-foreground",
 };
 
-const DELHI_LOCATIONS = [
+const DELHI_LOCATIONS =[
   { value: "AIIMS, New Delhi, Delhi, India", label: "AIIMS" },
+  { value: "All India Institute of Medical Sciences, Ansari Nagar, New Delhi, Delhi 110029, India", label: "AIIMS - AIIMS Hospital" },
+  { value: "AIIMS Metro Station, New Delhi, Delhi 110029, India", label: "AIIMS - Metro Station" },
+
   { value: "Chandni Chowk, Delhi, India", label: "Chandni Chowk" },
+  { value: "Red Fort, Netaji Subhash Marg, Delhi 110006, India", label: "Chandni Chowk - Red Fort" },
+  { value: "Jama Masjid, Chandni Chowk, Delhi 110006, India", label: "Chandni Chowk - Jama Masjid" },
+
   { value: "Civil Lines, Delhi, India", label: "Civil Lines" },
+  { value: "Civil Lines Metro Station, Delhi 110054, India", label: "Civil Lines - Metro Station" },
+
   { value: "Connaught Place, New Delhi, Delhi, India", label: "Connaught Place" },
+  { value: "Rajiv Chowk Metro Station, Connaught Place, New Delhi 110001, India", label: "Connaught Place - Rajiv Chowk Metro" },
+  { value: "Palika Bazaar, Connaught Place, New Delhi 110001, India", label: "Connaught Place - Palika Bazaar" },
+
   { value: "Dwarka, New Delhi, Delhi, India", label: "Dwarka" },
+  { value: "Dwarka Sector 21 Metro Station, New Delhi 110075, India", label: "Dwarka - Sector 21 Metro" },
+  { value: "Vegas Mall, Dwarka, New Delhi 110075, India", label: "Dwarka - Vegas Mall" },
+
   { value: "Greater Kailash, New Delhi, Delhi, India", label: "Greater Kailash" },
+  { value: "M Block Market, Greater Kailash I, New Delhi 110048, India", label: "Greater Kailash - M Block Market" },
+
   { value: "Hauz Khas, New Delhi, Delhi, India", label: "Hauz Khas" },
-  {
-    value: "Indira Gandhi International Airport, New Delhi, Delhi, India",
-    label: "IGI Airport",
-  },
+  { value: "Hauz Khas Village, New Delhi 110016, India", label: "Hauz Khas - Village" },
+  { value: "IIT Delhi, Hauz Khas, New Delhi 110016, India", label: "Hauz Khas - IIT Delhi" },
+
+  { value: "Indira Gandhi International Airport, New Delhi, Delhi, India", label: "IGI Airport" },
+  { value: "Terminal 3, IGI Airport, New Delhi 110037, India", label: "IGI Airport - Terminal 3" },
+  { value: "Aerocity Metro Station, New Delhi 110037, India", label: "IGI Airport - Aerocity Metro" },
+
   { value: "Janakpuri, New Delhi, Delhi, India", label: "Janakpuri" },
+  { value: "Janakpuri West Metro Station, New Delhi 110058, India", label: "Janakpuri - West Metro" },
+
   { value: "Kalkaji, New Delhi, Delhi, India", label: "Kalkaji" },
+  { value: "Kalkaji Mandir Metro Station, New Delhi 110019, India", label: "Kalkaji - Metro Station" },
+
   { value: "Karol Bagh, New Delhi, Delhi, India", label: "Karol Bagh" },
+  { value: "Karol Bagh Metro Station, New Delhi 110005, India", label: "Karol Bagh - Metro Station" },
+  { value: "Gaffar Market, Karol Bagh, New Delhi 110005, India", label: "Karol Bagh - Gaffar Market" },
+
   { value: "Lajpat Nagar, New Delhi, Delhi, India", label: "Lajpat Nagar" },
+  { value: "Central Market, Lajpat Nagar II, New Delhi 110024, India", label: "Lajpat Nagar - Central Market" },
+
   { value: "Mayur Vihar, Delhi, India", label: "Mayur Vihar" },
+  { value: "Mayur Vihar Phase 1 Metro Station, Delhi 110091, India", label: "Mayur Vihar - Metro Station" },
+
   { value: "Model Town, Delhi, India", label: "Model Town" },
+  { value: "Model Town Metro Station, Delhi 110009, India", label: "Model Town - Metro Station" },
+
   { value: "Nehru Place, New Delhi, Delhi, India", label: "Nehru Place" },
+  { value: "Nehru Place Metro Station, New Delhi 110019, India", label: "Nehru Place - Metro Station" },
+
   { value: "Noida Sector 18, Noida, Uttar Pradesh, India", label: "Noida Sector 18" },
+  { value: "DLF Mall of India, Sector 18, Noida 201301, India", label: "Noida Sector 18 - DLF Mall" },
+
   { value: "Okhla, New Delhi, Delhi, India", label: "Okhla" },
+  { value: "Okhla Industrial Area Phase I, New Delhi 110020, India", label: "Okhla - Industrial Area" },
+
   { value: "Pitampura, Delhi, India", label: "Pitampura" },
+  { value: "Netaji Subhash Place, Pitampura, Delhi 110034, India", label: "Pitampura - NSP" },
+
   { value: "Preet Vihar, Delhi, India", label: "Preet Vihar" },
+  { value: "Preet Vihar Metro Station, Delhi 110092, India", label: "Preet Vihar - Metro Station" },
+
   { value: "Punjabi Bagh, New Delhi, Delhi, India", label: "Punjabi Bagh" },
+  { value: "Pacific Mall, Punjabi Bagh, New Delhi 110026, India", label: "Punjabi Bagh - Pacific Mall" },
+
   { value: "Rajouri Garden, New Delhi, Delhi, India", label: "Rajouri Garden" },
+  { value: "Pacific Mall, Rajouri Garden, New Delhi 110027, India", label: "Rajouri Garden - Pacific Mall" },
+
   { value: "Rohini, Delhi, India", label: "Rohini" },
+  { value: "Rithala Metro Station, Rohini, Delhi 110085, India", label: "Rohini - Rithala Metro" },
+
   { value: "Saket, New Delhi, Delhi, India", label: "Saket" },
+  { value: "Select Citywalk Mall, Saket, New Delhi 110017, India", label: "Saket - Select Citywalk" },
+
   { value: "Shahdara, Delhi, India", label: "Shahdara" },
+  { value: "Shahdara Metro Station, Delhi 110032, India", label: "Shahdara - Metro Station" },
+
   { value: "Vasant Kunj, New Delhi, Delhi, India", label: "Vasant Kunj" },
+  { value: "DLF Promenade, Vasant Kunj, New Delhi 110070, India", label: "Vasant Kunj - DLF Promenade" },
 ];
+
 
 const MainPage = () => {
   const { user, logout } = useAuth();
